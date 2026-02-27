@@ -6,8 +6,8 @@ class Veiculo(models.Model):
     Descricao = models.CharField(max_length=255)
     MarcaId = models.ForeignKey('Marca', on_delete=models.DO_NOTHING)
     ModeloId = models.ForeignKey('Modelo', on_delete=models.DO_NOTHING)
-    Ano = models.IntegerField(max_length=4)
-    Horimetro = models.IntegerField(max_length=2)
+    Ano = models.IntegerField()
+    Horimetro = models.IntegerField()
     
     def __str__(self):
         return f'{self.Descricao} - {self.MarcaId} - {self.ModeloId} - {self.Ano} - {self.Horimetro}'
