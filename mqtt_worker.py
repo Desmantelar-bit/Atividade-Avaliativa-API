@@ -12,23 +12,13 @@ django.setup()
 from django.conf import settings
 from api_telemetria.models import MedicaoVeiculo, Veiculo, Medicao
 
-
-def on_connect(client, userdata, flags, rc):
-    print(f"[MQTT] Conectado com rc={rc}")
-
-    topic = settings.MQTT.get("TOPIC", "planta/sensores/#")
-    client.subscribe(topic)
-    print(f"[MQTT] Inscrito em {topic}")
-
-
-def on_message(client, userdata, msg):
+def inserirdados(client, userdata, item):
     try:
-        data = json.loads(msg.payload.decode())
-        veiculoid = int(data["veiculoid"])  # extrai o veículo do payload
-        medicaoid = int(data["sensorid"])  # extrai a medição do payload
-        valor = float(data["valor"])  # extrai o valor do payload
+        veiculoid = int(item["veiculoid"])  # extrai o veículo do payload
+        medicaoid = int(item["medicaoid"])  # extrai a medição do payload
+        valor = float(item["valor"])  # extrai o valor do payload
         
-        datae = datetime.datetime.fromisoformat(data['data'])  # extrai a data do payload
+        datae = datetime.datetime.fromisoformat(item['data'])  # extrai a data do payload
         
         veiculo = Veiculo.objects.get(id=veiculoid)
         medicao = Medicao.objects.get(id=medicaoid)
@@ -45,6 +35,29 @@ def on_message(client, userdata, msg):
     except Exception as e:
         print(f"[ERRO] Falha ao processar mensagem: {e}")
 
+
+def on_connect(client, userdata, flags, rc):
+    print(f"[MQTT] Conectado com rc={rc}")
+
+    topic = settings.MQTT.get("TOPIC", "planta/sensores/#")
+    client.subscribe(topic)
+    print(f"[MQTT] Inscrito em {topic}")
+
+
+def on_message(client, userdata, msg):
+    try:
+        data = json.loads(msg.payload.decode())
+        
+        if isinstance(data, list):
+            for item in data:
+                inserirdados(client, userdata, item)
+        else:
+            inserirdados(client, userdata, data)
+    
+    except json.JSONDecodeError:
+        print(f"[ERRO] Falha ao decodificar JSON: {msg.payload}")
+    except Exception as e:
+        print(f"[ERRO] Erro em on_message: {e}")
 
 def main():
     mqtt_cfg = settings.MQTT
