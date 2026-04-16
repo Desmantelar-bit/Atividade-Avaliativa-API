@@ -46,6 +46,15 @@ class UnidadeMedida(models.Model):
     
     def __str__(self):
         return self.Nome
+    
+class MedicaoVeiculoTemp(models.Model):
+    veiculoid = models.ForeignKey('Veiculo', on_delete=models.DO_NOTHING)
+    medicaoid = models.ForeignKey('Medicao', on_delete=models.DO_NOTHING)
+    data = models.DateTimeField()
+    valor = models.FloatField()
+    arquivoid = models.CharField(max_length=256, db_index=True)
+    
+
 
 
     
