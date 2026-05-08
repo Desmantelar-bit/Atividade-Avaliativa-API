@@ -8,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from api_telemetria.api.services import processar_csv_medicoes
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
+from django.db.models import F
 
 class VeiculoViewSet(viewsets.ModelViewSet):
     queryset = models.Veiculo.objects.all()
@@ -183,6 +186,13 @@ class MedicaoVeiculoViewSet(viewsets.ModelViewSet):
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
+        
+    @action(detail=True, methods=['get'], url_path='rel_medicoesporveiculo')
+    def list_medicoes_por_veiculo_rel(self, request, pk=None):
+        porveiculos = get_object_or_404(models.Veiculo, id=pk)
+        medicoes = models.MedicaoVeiculo.objects.filter(VeiculoId = porveiculos)
+        serializerMedicao = serializers.MedicaoVeiculoSerializer(medicoes, many=True)
+        return Response(serializerMedicao.data)
 
 class MedicaoViewSet(viewsets.ModelViewSet):
     queryset = models.Medicao.objects.all()
@@ -223,7 +233,7 @@ class MedicaoViewSet(viewsets.ModelViewSet):
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
-    
+
 class UnidadeMedidaViewSet(viewsets.ModelViewSet):
     queryset = models.UnidadeMedida.objects.all()
     serializer_class = serializers.UnidadeMedidaSerializer
@@ -304,3 +314,38 @@ class MedicaoVeiculoTempViewSet(viewsets.ModelViewSet):
     
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+class DadosRelatorioViewSet(viewsets.ModelViewSet):
+    queryset = models.MedicaoVeiculo.objects.all()
+    serializer_class = serializers.MedicaoVeiculoSerializer
+
+    @swagger_auto_schema(
+        operation_description="Retorna relatório de medições com dados do veículo, modelo, marca e tipo de medição",
+    )
+    @action(detail=False, methods=['get'])
+    
+    def DadosRelatorio(self, request):
+        dados = models.MedicaoVeiculo.objects.select_related(
+            'MedicaoId__UnidadeMedida',
+            'VeiculoId__ModeloId',
+            'VeiculoId__MarcaId',
+            
+            ).annotate(
+            Descricao=F('VeiculoId__Descricao'),
+            Modelo=F('VeiculoId__ModeloId__Nome'),
+            Marca=F('VeiculoId__MarcaId__Nome'),
+            Tipo=F('MedicaoId__Tipo'),
+            Simbolo=F('MedicaoId__UnidadeMedidaId__Nome'),
+            
+        ).values(
+            'id',
+            'Data',
+            'Descricao',
+            'Modelo',
+            'Marca',
+            'Tipo',
+            'Simbolo',
+            'Valor',
+        )
+        serializer = serializers.DadosRelatorioSerializer(dados, many=True)
+        return Response(serializer.data)

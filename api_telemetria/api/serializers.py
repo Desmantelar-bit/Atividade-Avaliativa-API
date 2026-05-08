@@ -75,4 +75,13 @@ class MedicaoVeiculoTempSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.MedicaoVeiculoTemp
         fields = '__all__'
-         
+
+class DadosRelatorioSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Data = serializers.DateTimeField()
+    Descricao = serializers.CharField()
+    Modelo = serializers.CharField()
+    Marca = serializers.CharField()
+    Tipo = serializers.CharField()
+    Simbolo = serializers.CharField()
+    Valor = serializers.DecimalField(max_digits=10, decimal_places=2)

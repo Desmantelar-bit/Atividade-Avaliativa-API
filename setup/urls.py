@@ -44,6 +44,7 @@ router.register(r'MedicoesVeiculos', viewsets.MedicaoVeiculoViewSet, basename='m
 router.register(r'Medicoes', viewsets.MedicaoViewSet, basename='medicao')
 router.register(r'UnidadesMedida', viewsets.UnidadeMedidaViewSet, basename='unidade_medida')
 router.register(r'MedicoesVeiculoTemp', viewsets.MedicaoVeiculoTempViewSet, basename='medicao_veiculo_temp')
+router.register(r'Relatório', viewsets.DadosRelatorioViewSet, basename='relatorio')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
