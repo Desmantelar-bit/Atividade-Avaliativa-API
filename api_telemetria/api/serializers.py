@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from api_telemetria import models
+from django.contrib.auth.models import User
 
 class VeiculoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -84,4 +85,14 @@ class DadosRelatorioSerializer(serializers.Serializer):
     Marca = serializers.CharField()
     Tipo = serializers.CharField()
     Simbolo = serializers.CharField()
-    Valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+    Valor = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
+    
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    

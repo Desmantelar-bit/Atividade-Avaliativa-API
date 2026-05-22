@@ -1,5 +1,5 @@
 from api_telemetria import models
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from api_telemetria.api import serializers
 from drf_yasg.utils import swagger_auto_schema
 
@@ -12,9 +12,15 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.db.models import F
 
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+
 class VeiculoViewSet(viewsets.ModelViewSet):
     queryset = models.Veiculo.objects.all()
     serializer_class = serializers.VeiculoSerializer
+    permision_classes = [IsAuthenticated]
     
     # decoradores para documentação do swagger, descrevendo cada endpoint e os tipos de resposta esperados  
     
@@ -349,3 +355,29 @@ class DadosRelatorioViewSet(viewsets.ModelViewSet):
         )
         serializer = serializers.DadosRelatorioSerializer(dados, many=True)
         return Response(serializer.data)
+
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.UserSerializer  
+    queryset = User.objects.all()
+    
+class LoginViewSet(viewsets.ViewSet):
+    
+    def create(self, request):  
+        
+        serializer = serializers.LoginSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+            user = authenticate(username=username, password=password)
+        
+            if user is not None:
+                
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({
+                    'token': token.key,
+                    'user': serializers.UserSerializer(user).data},status=status.HTTP_200_OK)
+            
+        return Response({'error': 'Credenciais inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+    
