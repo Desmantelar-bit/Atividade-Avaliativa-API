@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -147,20 +148,35 @@ Media_URL = "/media/"
 Media_ROOT = BASE_DIR / "media"
 
 MQTT = {
-    "HOST": "jaragua.lmq.cloudamqp.com",
-    "PORT": 1883,
+    "HOST": "leopard.lmq.cloudamqp.com", 
+    "PORT": 8883,
     "KEEPALIVE": 60,
-    "TOPIC": "dadosSensor",  # ajuste o(s) tópico(s)
+    "TOPIC": "cacau",  # ajuste o(s) tópico(s)
     "CLIENT_ID": "django-mqtt-worker",
-    "USERNAME":  'vbonyahl:vbonyahl',
-    "PASSWORD": 'Bc1zjSdOw3HIdYBkKLjWRtfayHt32oRD',
+    "USERNAME":  'ipeuhpmz:ipeuhpmz',
+    "PASSWORD": '9m8Dg10glbXS60KgSYw4a5IdwasgviId',
 }
+
 # MQTT = {
-#     "HOST": "leopard.lmq.cloudamqp.com",
+#     "HOST": "jaragua.lmq.cloudamqp.com",
 #     "PORT": 1883,
 #     "KEEPALIVE": 60,
 #     "TOPIC": "dadosSensor",  # ajuste o(s) tópico(s)
 #     "CLIENT_ID": "django-mqtt-worker",
-#     "USERNAME":  'ipeuhpmz:ipeuhpmz',
-#     "PASSWORD": '9mHDqT0glbXS60Kj9Yw4a5IdwasqviTd',
+#     "USERNAME":  'vbonyahl:vbonyahl',
+#     "PASSWORD": 'Bc1zjSdOw3HIdYBkKLjWRtfayHt32oRD',
 # }
+
+REST_FRAMEWORK ={
+    'DEFAULT_AUTHENTICATION_CLASSES': 
+        ['rest_framework_simplejwt.authentication.JWTAuthentication']
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
+}
+    

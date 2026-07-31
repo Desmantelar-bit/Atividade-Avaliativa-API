@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class VeiculoViewSet(viewsets.ModelViewSet):
     queryset = models.Veiculo.objects.all()
@@ -373,11 +374,18 @@ class LoginViewSet(viewsets.ViewSet):
             user = authenticate(username=username, password=password)
         
             if user is not None:
-                
-                token, created = Token.objects.get_or_create(user=user)
+                refresh = RefreshToken.for_user(user)
+                access_token = refresh.access_token
                 return Response({
-                    'token': token.key,
-                    'user': serializers.UserSerializer(user).data},status=status.HTTP_200_OK)
+                    'access': str(access_token),
+                    'refresh': str(refresh),
+                    'user': {
+                        'id': user.id,
+                        'username': user.username
+                    }
+                }, status=status.HTTP_200_OK)
             
-        return Response({'error': 'Credenciais inválidas'}, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(serializer.erros, status=status.HTTP_400_BAD_REQUEST)
+                
